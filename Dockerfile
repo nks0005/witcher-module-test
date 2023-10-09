@@ -32,7 +32,15 @@ RUN cp ./src/dash /work/wicher-dash
 WORKDIR /work
 RUN gcc -o test test.cpp
 
+# ------------------------
 
+# todo -> 서버 실행 + 쉘 연결
+RUN unzip nodejs-dummy-main.zip
+WORKDIR /work/nodejs-dummy-main
+RUN npm i
 
+# 쉘 연결
+# RUN rm /bin/sh
+RUN cp /work/wicher-dash /bin/sh
 
 CMD ["/bin/sh"]
