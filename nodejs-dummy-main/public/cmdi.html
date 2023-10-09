@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Exec</title>
+</head>
+<body>
+    <h1>Command exec form</h1>
+    <form id="commandForm">
+        <label for="command">Command input : </label>
+        <input type="text" id="command" name="command" required>
+        <button type="submit">Exec</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('commandForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const command = document.getElementById('command').value;
+            fetch('/cmdi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('result').innerText = data;
+            })
+            .catch(error => {
+                console.error("Error : ", error);
+            });
+        });
+    </script>
+</body>
+</html>
