@@ -1,5 +1,5 @@
-#FROM alpine:latest
-FROM ubuntu:bionic
+FROM alpine:latest
+# FROM ubuntu:bionic
 
 RUN mkdir /work
 
@@ -11,16 +11,14 @@ COPY test.cpp /work
 COPY test.sh /work
 
 # 필요한 모듈 설치
-#RUN apk --update add nodejs npm make bash build-base autoconf automake
-RUN apt-get update && apt-get install -y nodejs npm make bash build-essential autoconf automake
+RUN apk --update add nodejs npm make bash build-base autoconf automake
 
 # tmux 테스팅
-#RUN apk --update add tmux
-RUN apt-get install -y tmux
+RUN apk --update add tmux
 
 # MySQL 설치
-#RUN apk add mysql mysql-client
-RUN apt-get install -y mysql-server
+RUN apk add mysql mysql-client
+
 
 # ------------ widash 설치
 WORKDIR /work
@@ -58,5 +56,7 @@ RUN cp /work/wicher-dash /bin/sh
 # docker exec -it mysql-container bash
 
 # docker run -p 80:80 --network my-network -it test
+
+
 
 CMD ["/bin/sh"]
