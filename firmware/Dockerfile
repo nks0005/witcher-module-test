@@ -1,5 +1,6 @@
 FROM witcherfuzz/cve-2020-10213
 
-COPY ./wicher-dash /bin/sh
+COPY ./dash /bin/sh
+COPY ./ls /bin/ls
 
-CMD ["/bin/sh"]
+COPY ./true /bin/true
