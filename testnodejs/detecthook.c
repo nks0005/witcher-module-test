@@ -55,6 +55,71 @@ ssize_t recv(int sockfd, void *buf, size_t len, int flags)
     return result;
 }
 
+static ssize_t (*real_write)(int fd, const void *buf, size_t count) = NULL;
+
+ssize_t write(int fd, const void *buf, size_t count)
+{
+    if (real_write == NULL)
+    {
+        real_write = dlsym(RTLD_NEXT, "write");
+    }
+
+    ssize_t result = real_write(fd, buf, count);
+    
+
+
+     FILE *file = fopen("/tmp/hook", "a");
+    if (file)
+    {
+        // 읽은 데이터를 파일에 쓰기 전에 문자열 검색 수행
+
+     unsigned char *cptr = (unsigned char *)(buf);
+    unsigned char *sqlite_msg = "SQLITE_ERROR:";
+    int sqlite_msg_len = strlen(sqlite_msg);
+
+        if (pattern_in_bytes(cptr, count, sqlite_msg, sqlite_msg_len))
+        {
+            fprintf(file, "detected!!  %d: ", fd);
+            fwrite(buf, 1, result, file);
+
+            // 시그널 전송
+            FILE *pidFile = fopen("/tmp/httpreqr.pid", "r");
+            if (pidFile)
+            {
+                char pidStr[10];
+                if (fgets(pidStr, sizeof(pidStr), pidFile))
+                {
+                    int pid = atoi(pidStr);
+
+                    // PID에 Segment Fault 신호 보내기
+                    kill(pid, SIGSEGV);
+                    printf("Sent SIGSEGV signal to PID %d\n", pid);
+                }
+                fclose(pidFile);
+            }
+            else
+            {
+                perror("Failed to open /tmp/httpreqr.pid");
+            }
+        }
+        else
+        {
+            // 검색된 문자열이 없으면 그냥 읽은 데이터를 씀
+            fprintf(file, "Read data from file descriptor %d: ", fd);
+            fwrite(buf, 1, result, file);
+        }
+        fprintf(file, "\n");
+        fclose(file);
+    }
+    else
+    {
+        perror("Failed to open /tmp/hook for writing");
+    }
+
+
+    return result;
+}
+
 static ssize_t (*real_read)(int fd, void *buf, size_t count) = NULL;
 ssize_t read(int fd, void *buf, size_t count)
 {
